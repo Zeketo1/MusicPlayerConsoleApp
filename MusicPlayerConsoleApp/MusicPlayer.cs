@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NAudio.Wave;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,10 +27,13 @@ namespace MusicPlayerConsoleApp
         // Add a song to the playlist
         public void AddSong()
         {
-            Console.Write("Enter the name of the song: ");
-            string song = Console.ReadLine();
-            playlist.Add(song);
-            Console.WriteLine($"{song} added to the playlist.");
+            Console.Write("Enter the File path: ");
+            string audioFilePath = Console.ReadLine();
+            /*string audioFilePath = @"C:\Users\DELL\Downloads\Cast.wav";*/
+
+
+            playlist.Add(audioFilePath);
+            Console.WriteLine($"{audioFilePath} added to the playlist.");
         }
 
         // Delete a song from the playlist
@@ -67,9 +71,29 @@ namespace MusicPlayerConsoleApp
             }
 
             Console.WriteLine("\nPlaying Playlist:");
-            foreach (string song in playlist)
+            foreach (string audioFilePath in playlist)
             {
-                Console.WriteLine($"Now playing: {song}");
+                Console.WriteLine($"Now playing: {audioFilePath}");
+                // Create an instance of AudioFileReader to read the audio file
+                using (AudioFileReader audioFileReader = new AudioFileReader(audioFilePath))
+                {
+                    // Create an instance of WaveOutEvent to play the audio
+                    using (WaveOutEvent waveOutEvent = new WaveOutEvent())
+                    {
+                        // Connect the AudioFileReader to the WaveOutEvent
+                        waveOutEvent.Init(audioFileReader);
+
+                        // Start playing the audio
+                        waveOutEvent.Play();
+
+                        Console.WriteLine("Playing audio...");
+                        Console.WriteLine("Press any key to stop...");
+                        Console.ReadKey();
+
+                        // Stop playing the audio
+                        waveOutEvent.Stop();
+                    }
+                }
             }
         }
 
