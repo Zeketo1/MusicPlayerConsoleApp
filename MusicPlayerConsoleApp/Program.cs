@@ -7,6 +7,7 @@
         {
             MusicPlayer player = new MusicPlayer();
             player.Run();
+
         }
     }
 }

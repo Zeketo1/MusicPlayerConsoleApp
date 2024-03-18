@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using NAudio.Wave;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicPlayerConsoleApp
 {
+    public delegate void MusicPlayerDelegate(string audioFilePath);
+
     class MusicPlayer
     {
         private List<string> playlist = new List<string>();
@@ -25,13 +25,8 @@ namespace MusicPlayerConsoleApp
         }
 
         // Add a song to the playlist
-        public void AddSong()
+        public void AddSong(string audioFilePath)
         {
-            Console.Write("Enter the File path: ");
-            string audioFilePath = Console.ReadLine();
-            /*string audioFilePath = @"C:\Users\DELL\Downloads\Cast.wav";*/
-
-
             playlist.Add(audioFilePath);
             Console.WriteLine($"{audioFilePath} added to the playlist.");
         }
@@ -61,8 +56,8 @@ namespace MusicPlayerConsoleApp
             }
         }
 
-        // Play all songs in the playlist
-        public void PlayPlaylist()
+        // Play all songs in the playlist using delegate
+        public void PlayPlaylist(MusicPlayerDelegate playSongDelegate)
         {
             if (playlist.Count == 0)
             {
@@ -73,27 +68,7 @@ namespace MusicPlayerConsoleApp
             Console.WriteLine("\nPlaying Playlist:");
             foreach (string audioFilePath in playlist)
             {
-                Console.WriteLine($"Now playing: {audioFilePath}");
-                // Create an instance of AudioFileReader to read the audio file
-                using (AudioFileReader audioFileReader = new AudioFileReader(audioFilePath))
-                {
-                    // Create an instance of WaveOutEvent to play the audio
-                    using (WaveOutEvent waveOutEvent = new WaveOutEvent())
-                    {
-                        // Connect the AudioFileReader to the WaveOutEvent
-                        waveOutEvent.Init(audioFileReader);
-
-                        // Start playing the audio
-                        waveOutEvent.Play();
-
-                        Console.WriteLine("Playing audio...");
-                        Console.WriteLine("Press any key to stop...");
-                        Console.ReadKey();
-
-                        // Stop playing the audio
-                        waveOutEvent.Stop();
-                    }
-                }
+                playSongDelegate(audioFilePath);
             }
         }
 
@@ -140,13 +115,16 @@ namespace MusicPlayerConsoleApp
                 switch (choice)
                 {
                     case "1":
-                        AddSong();
+                        Console.Write("Enter the File path: ");
+                        string audioFilePath = Console.ReadLine();
+                        AddSong(audioFilePath);
                         break;
                     case "2":
                         DeleteSong();
                         break;
                     case "3":
-                        PlayPlaylist();
+                        // Use delegate to play playlist
+                        PlayPlaylist(PlaySong);
                         break;
                     case "4":
                         ShufflePlaylist();
@@ -163,6 +141,23 @@ namespace MusicPlayerConsoleApp
                     default:
                         Console.WriteLine("Invalid choice. Please enter a number between 1 and 7.");
                         break;
+                }
+            }
+        }
+
+        // Delegate method to play a song
+        private void PlaySong(string audioFilePath)
+        {
+            Console.WriteLine($"Now playing: {audioFilePath}");
+            using (AudioFileReader audioFileReader = new AudioFileReader(audioFilePath))
+            {
+                using (WaveOutEvent waveOutEvent = new WaveOutEvent())
+                {
+                    waveOutEvent.Init(audioFileReader);
+                    waveOutEvent.Play();
+                    Console.WriteLine("Press any key to stop...");
+                    Console.ReadKey();
+                    waveOutEvent.Stop();
                 }
             }
         }
